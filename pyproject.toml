@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "crypto-trading-bot"
+version = "0.1.0"
+description = "This is a binance crypto-trading automatic bot."
+authors = ["RomanchenkoAS <RomanchenkoAS@yandex.ru>"]
+readme = "README.md"
+packages = [{include = "crypto_trading_bot"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
