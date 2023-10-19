@@ -36,18 +36,13 @@ stop_loss = 5  # in percentage
 take_profit = 10  # in percentage
 
 pf = vbt.Portfolio.from_signals(
-    btc_price,
-    entries,
-    exits,
-    stop_loss=stop_loss,
-    take_profit=take_profit
+    btc_price, entries, exits, stop_loss=stop_loss, take_profit=take_profit
 )
 
 # Output performance matrix
 pf_perf = pf.deep_getattr(metric)
 pf_perf_matrix = pf_perf.vbt.unstack_to_df(
-    index_levels="rsi_crossed_above",
-    column_levels="rsi_crossed_below"
+    index_levels="rsi_crossed_above", column_levels="rsi_crossed_below"
 )
 print(pf_perf_matrix)
 pf_perf_matrix.vbt.heatmap(xaxis_title="entry", yaxis_title="exit").show()
