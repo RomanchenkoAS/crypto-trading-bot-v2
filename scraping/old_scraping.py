@@ -3,6 +3,9 @@ import pandas as pd
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
 
+# TODO Lets introduce class scraper
+# And structure that a little better
+
 currency_pair = "btcusd"
 url = f"https://www.bitstamp.net/api/v2/ohlc/{currency_pair}/"
 
