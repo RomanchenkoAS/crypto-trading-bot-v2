@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 currency_pair = "btcusd"
 url = f"https://www.bitstamp.net/api/v2/ohlc/{currency_pair}/"
 
-# Before 123123
+# Before
 start = datetime.now() - timedelta(1)
 # Now
 end = datetime.now()
