@@ -9,6 +9,7 @@ readme = "README.md"
 python = "3.10.12"
 vectorbt = "^0.25.5"
 jupyter = "^1.0.0"
+grequests = "^0.7.0"
 
 
 [build-system]

@@ -1,3 +1,4 @@
+import grequests
 import requests
 import pandas as pd
 from datetime import datetime, timedelta
@@ -18,3 +19,68 @@ class Scraper:
         dates = pd.date_range(start, end, freq=frequency)
         self.dates = [int(x.value / 10 ** 9) for x in list(dates)]
 
+    def scrape(self, interval: int = 60):
+        """ NOTE: Requires VPN to work """
+        # print("Time intervals: ")
+        params_list = []
+        for first, last in zip(self.dates, self.dates[1:]):
+            # print(
+            #     datetime.fromtimestamp(first).strftime("%m/%d/%Y, %H:%M:%S"),
+            #     " -> ",
+            #     datetime.fromtimestamp(last).strftime("%m/%d/%Y, %H:%M:%S"),
+            # )
+
+            params = {
+                "step": interval,  # seconds
+                "limit": 1000,  # 1..1000
+                "start": first,
+                "end": last,
+            }
+            params_list.append(params)
+
+        requests_list = (grequests.get(self.url, params=params) for params in params_list)
+        responses = grequests.map(requests_list)
+
+        import code
+        code.interact(local=locals())
+        # master_data += data
+        master_data = []
+
+        self.df = pd.DataFrame(master_data)
+
+    def save_to_csv(self, filename="data.csv"):
+        if self.df is not None:
+            self.df.to_csv(filename, index=False)
+        else:
+            print("No data available to save!")
+
+    def visualize(self):
+        if self.df is None:
+            print("Data not available for visualization!")
+            return
+
+        self.df["datetime"] = self.df["timestamp"].apply(lambda x: pd.to_datetime(x, unit="s"))
+        fig = go.Figure(
+            data=[
+                go.Candlestick(
+                    x=self.df["datetime"],
+                    open=self.df["open"],
+                    high=self.df["high"],
+                    low=self.df["low"],
+                    close=self.df["close"],
+                )
+            ]
+        )
+
+        fig.update_layout(xaxis_rangeslider_visible=False)
+        fig.update_layout(template="plotly_dark")
+        fig.update_layout(yaxis_title=f"{self.currency_pair.upper()} pair", xaxis_title="Date-time")
+        fig.show()
+
+
+scraper = Scraper(currency_pair="btcusdt")
+scraper.set_time_range(range_size=10, frequency="6H")
+scraper.scrape()
+# scraper.clean_data()
+scraper.visualize()
+scraper.save_to_csv(filename="data.csv")
