@@ -41,11 +41,8 @@ class Scraper:
         requests_list = (grequests.get(self.url, params=params) for params in params_list)
         responses = grequests.map(requests_list)
 
-        import code
-        code.interact(local=locals())
-        # master_data += data
-        master_data = []
-
+        master_data = [data.json()["data"]["ohlc"] for data in responses]
+        print(master_data)
         self.df = pd.DataFrame(master_data)
 
     def save_to_csv(self, filename="data.csv"):
@@ -53,6 +50,17 @@ class Scraper:
             self.df.to_csv(filename, index=False)
         else:
             print("No data available to save!")
+
+    def clean_data(self):
+        if self.df is None:
+            print("Data not scraped yet!")
+            return
+
+        self.df = self.df.drop_duplicates()
+        self.df["timestamp"] = self.df["timestamp"].astype(int)
+        self.df = self.df.sort_values(by="timestamp")
+        self.df = self.df[self.df["timestamp"] >= self.dates[0]]
+        self.df = self.df[self.df["timestamp"] < self.dates[-1]]
 
     def visualize(self):
         if self.df is None:
@@ -81,6 +89,6 @@ class Scraper:
 scraper = Scraper(currency_pair="btcusdt")
 scraper.set_time_range(range_size=10, frequency="6H")
 scraper.scrape()
-# scraper.clean_data()
+scraper.clean_data()
 scraper.visualize()
 scraper.save_to_csv(filename="data.csv")
