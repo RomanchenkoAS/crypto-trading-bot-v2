@@ -1,4 +1,3 @@
-import grequests
 import pandas as pd
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
@@ -20,6 +19,7 @@ class Scraper:
         self.dates = [int(x.value / 10 ** 9) for x in list(dates)]
 
     def scrape(self, interval: int = 60, explicit: bool = False):
+        from grequests import get as grequests_get, map as grequests_map
         """ NOTE: Requires VPN to work. Explicit = True to inspect time intervals and responses list. """
         params_list = []
         if explicit:
@@ -40,8 +40,8 @@ class Scraper:
             }
             params_list.append(params)
 
-        requests_list = (grequests.get(self.url, params=params) for params in params_list)
-        responses = grequests.map(requests_list)
+        requests_list = (grequests_get(self.url, params=params) for params in params_list)
+        responses = grequests_map(requests_list)
 
         # A motherfucking nested list comprehension = flattening data
         master_data = [item for data in responses for item in data.json()["data"]["ohlc"]]
@@ -49,7 +49,7 @@ class Scraper:
         if explicit:
             print(self.df)
 
-    def save_to_csv(self, filename: str="data.csv"):
+    def save_to_csv(self, filename: str = "data.csv"):
         """ Save to file """
         if filename is None:
             print("Current data will not be saved.")
@@ -96,14 +96,18 @@ class Scraper:
 
 SETUP = {
     "currency_pair": "btcusdt",
-    "range_size": 100,  # Number of Days in scraping period
+    "range_size": 10,  # Number of Days in scraping period
     "interval": 60,  # Length of one cline
     "filename": "data.csv",  # Where to save the data | None to not save
+    "show_timestamps": False,
+    "show_plot": True
 }
 
 if __name__ == '__main__':
     scraper = Scraper(currency_pair=SETUP["currency_pair"])
     scraper.set_time_range(range_size=SETUP["range_size"])
-    scraper.scrape(interval=SETUP["interval"])
-    scraper.visualize()
-    scraper.save_to_csv(filename=SETUP["filename"])
+    scraper.scrape(interval=SETUP["interval"], explicit=SETUP["show_timestamps"])
+    if SETUP["show_plot"]:
+        scraper.visualize()
+    if SETUP["filename"]:
+        scraper.save_to_csv(filename=SETUP["filename"])
