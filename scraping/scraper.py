@@ -1,5 +1,4 @@
 import grequests
-import requests
 import pandas as pd
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
@@ -50,7 +49,7 @@ class Scraper:
         if explicit:
             print(self.df)
 
-    def save_to_csv(self, filename="data.csv"):
+    def save_to_csv(self, filename: str="data.csv"):
         """ Save to file """
         if filename is None:
             print("Current data will not be saved.")
@@ -95,15 +94,16 @@ class Scraper:
         fig.show()
 
 
-setup = {
+SETUP = {
     "currency_pair": "btcusdt",
-    "range_size": 10,  # Number of Days in scraping period
+    "range_size": 100,  # Number of Days in scraping period
     "interval": 60,  # Length of one cline
     "filename": "data.csv",  # Where to save the data | None to not save
 }
 
-scraper = Scraper(currency_pair=setup["currency_pair"])
-scraper.set_time_range(range_size=10)
-scraper.scrape(interval=setup["interval"])
-scraper.visualize()
-scraper.save_to_csv(filename=setup["filename"])
+if __name__ == '__main__':
+    scraper = Scraper(currency_pair=SETUP["currency_pair"])
+    scraper.set_time_range(range_size=SETUP["range_size"])
+    scraper.scrape(interval=SETUP["interval"])
+    scraper.visualize()
+    scraper.save_to_csv(filename=SETUP["filename"])
