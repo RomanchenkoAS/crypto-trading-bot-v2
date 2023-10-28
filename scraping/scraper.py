@@ -52,6 +52,8 @@ class Scraper:
 
     def save_to_csv(self, filename="data.csv"):
         """ Save to file """
+        if filename is None:
+            print("Current data will not be saved.")
         if self.df is not None:
             self.df.to_csv(filename, index=False)
         else:
@@ -95,11 +97,13 @@ class Scraper:
 
 setup = {
     "currency_pair": "btcusdt",
-    "frequency": "6H"
+    "range_size": 10,  # Number of Days in scraping period
+    "interval": 60,  # Length of one cline
+    "filename": "data.csv",  # Where to save the data | None to not save
 }
 
 scraper = Scraper(currency_pair=setup["currency_pair"])
 scraper.set_time_range(range_size=10)
-scraper.scrape()
+scraper.scrape(interval=setup["interval"])
 scraper.visualize()
-scraper.save_to_csv(filename="data.csv")
+scraper.save_to_csv(filename=setup["filename"])
