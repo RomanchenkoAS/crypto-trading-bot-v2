@@ -1,6 +1,10 @@
 import pandas as pd
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
+import warnings
+
+# Filter out FutureWarnings from _plotly_utils.basevalidators
+warnings.filterwarnings('ignore', category=FutureWarning, module='_plotly_utils.basevalidators')
 
 
 class Scraper:
@@ -46,8 +50,9 @@ class Scraper:
         # A motherfucking nested list comprehension = flattening data
         master_data = [item for data in responses for item in data.json()["data"]["ohlc"]]
         self.df = pd.DataFrame(master_data)
-        if explicit:
-            print(self.df)
+
+        # if explicit:
+        #     print(self.df)
 
     def save_to_csv(self, filename: str = "data.csv"):
         """ Save to file """
