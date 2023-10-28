@@ -12,23 +12,26 @@ class Scraper:
         self.url: str = f"https://www.bitstamp.net/api/v2/ohlc/{currency_pair}/"
         self.df: pd.DataFrame = pd.DataFrame()
 
-    def set_time_range(self, range_size: int, frequency: str = "1D"):
+    def set_time_range(self, range_size: int):
         end = datetime.now()
         start = datetime.now() - timedelta(range_size)
+        frequency = "6H"  # May be turned into a parameter if needed
 
         dates = pd.date_range(start, end, freq=frequency)
         self.dates = [int(x.value / 10 ** 9) for x in list(dates)]
 
-    def scrape(self, interval: int = 60):
-        """ NOTE: Requires VPN to work """
-        # print("Time intervals: ")
+    def scrape(self, interval: int = 60, explicit: bool = False):
+        """ NOTE: Requires VPN to work. Explicit = True to inspect time intervals and responses list. """
         params_list = []
+        if explicit:
+            print("Time intervals: ")
         for first, last in zip(self.dates, self.dates[1:]):
-            # print(
-            #     datetime.fromtimestamp(first).strftime("%m/%d/%Y, %H:%M:%S"),
-            #     " -> ",
-            #     datetime.fromtimestamp(last).strftime("%m/%d/%Y, %H:%M:%S"),
-            # )
+            if explicit:
+                print(
+                    datetime.fromtimestamp(first).strftime("%m/%d/%Y, %H:%M:%S"),
+                    " -> ",
+                    datetime.fromtimestamp(last).strftime("%m/%d/%Y, %H:%M:%S"),
+                )
 
             params = {
                 "step": interval,  # seconds
@@ -41,11 +44,14 @@ class Scraper:
         requests_list = (grequests.get(self.url, params=params) for params in params_list)
         responses = grequests.map(requests_list)
 
-        master_data = [data.json()["data"]["ohlc"] for data in responses]
-        print(master_data)
+        # A motherfucking nested list comprehension = flattening data
+        master_data = [item for data in responses for item in data.json()["data"]["ohlc"]]
         self.df = pd.DataFrame(master_data)
+        if explicit:
+            print(self.df)
 
     def save_to_csv(self, filename="data.csv"):
+        """ Save to file """
         if self.df is not None:
             self.df.to_csv(filename, index=False)
         else:
@@ -63,6 +69,7 @@ class Scraper:
         self.df = self.df[self.df["timestamp"] < self.dates[-1]]
 
     def visualize(self):
+        self.clean_data()
         if self.df is None:
             print("Data not available for visualization!")
             return
@@ -86,9 +93,13 @@ class Scraper:
         fig.show()
 
 
-scraper = Scraper(currency_pair="btcusdt")
-scraper.set_time_range(range_size=10, frequency="6H")
+setup = {
+    "currency_pair": "btcusdt",
+    "frequency": "6H"
+}
+
+scraper = Scraper(currency_pair=setup["currency_pair"])
+scraper.set_time_range(range_size=10)
 scraper.scrape()
-scraper.clean_data()
 scraper.visualize()
 scraper.save_to_csv(filename="data.csv")
