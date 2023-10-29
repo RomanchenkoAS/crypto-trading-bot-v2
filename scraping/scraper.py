@@ -23,19 +23,10 @@ class Scraper:
         self.dates = [int(x.value / 10 ** 9) for x in list(dates)]
 
     def scrape(self, interval: int = 60, explicit: bool = False):
-        from grequests import get as grequests_get, map as grequests_map
-        """ NOTE: Requires VPN to work. Explicit = True to inspect time intervals and responses list. """
+        """ NOTE: Requires VPN to work. Explicit = True to inspect time intervals. """
+        from grequests import get as grequests_get, map as grequests_map  # Import here to avoid monkey-patching
         params_list = []
-        if explicit:
-            print("Time intervals: ")
         for first, last in zip(self.dates, self.dates[1:]):
-            if explicit:
-                print(
-                    datetime.fromtimestamp(first).strftime("%m/%d/%Y, %H:%M:%S"),
-                    " -> ",
-                    datetime.fromtimestamp(last).strftime("%m/%d/%Y, %H:%M:%S"),
-                )
-
             params = {
                 "step": interval,  # seconds
                 "limit": 1000,  # 1..1000
@@ -44,15 +35,21 @@ class Scraper:
             }
             params_list.append(params)
 
+        if explicit:
+            print("Time intervals (first/last): ")
+            for p in [params_list[0], params_list[-1]]:
+                print(
+                    datetime.fromtimestamp(p["start"]).strftime("%m/%d/%Y, %H:%M:%S"),
+                    " -> ",
+                    datetime.fromtimestamp(p["end"]).strftime("%m/%d/%Y, %H:%M:%S"),
+                )
+
         requests_list = (grequests_get(self.url, params=params) for params in params_list)
         responses = grequests_map(requests_list)
 
-        # A motherfucking nested list comprehension = flattening data
+        # Nested list comprehension = flattening data
         master_data = [item for data in responses for item in data.json()["data"]["ohlc"]]
         self.df = pd.DataFrame(master_data)
-
-        # if explicit:
-        #     print(self.df)
 
     def save_to_csv(self, filename: str = "data.csv"):
         """ Save to file """
