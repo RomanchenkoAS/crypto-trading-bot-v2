@@ -56,9 +56,14 @@ class Scraper:
         if filename is None:
             print("Current data will not be saved.")
         if self.df is not None:
+            self.clean_data()
             self.df.to_csv(filename, index=False)
         else:
             print("No data available to save!")
+
+    def get_dataframe(self):
+        self.clean_data()
+        return self.df
 
     def clean_data(self):
         # Strip excessive data not included in time period
