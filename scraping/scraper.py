@@ -8,7 +8,7 @@ warnings.filterwarnings('ignore', category=FutureWarning, module='_plotly_utils.
 
 
 class Scraper:
-    def __init__(self, currency_pair: str = "btcusd"):
+    def __init__(self, currency_pair: str = "btcusdt"):
         self.dates: list[int] = []
         self.currency_pair: str = currency_pair
         self.url: str = f"https://www.bitstamp.net/api/v2/ohlc/{currency_pair}/"
