@@ -61,6 +61,7 @@ class Scraper:
             print("No data available to save!")
 
     def clean_data(self):
+        # Strip excessive data not included in time period
         if self.df is None:
             print("Data not scraped yet!")
             return
