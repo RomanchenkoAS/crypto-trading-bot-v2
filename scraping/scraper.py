@@ -108,9 +108,9 @@ class Scraper:
 
 SETUP = {
     "currency_pair": "btcusdt",
-    "range_size": 10,  # Number of Days in scraping period
+    "range_size": 30,  # Number of Days in scraping period
     "interval": 60,  # Length of one cline, sec
-    "filename": "data.csv",  # Where to save the data | None to not save
+    "filename": "data_30.csv",  # Where to save the data | None to not save
     "show_timestamps": False,
     "show_plot": True
 }
