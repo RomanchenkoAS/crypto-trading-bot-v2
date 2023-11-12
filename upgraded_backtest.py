@@ -8,7 +8,7 @@ import vectorbt as vbt
 # Preferences
 num = 30
 metric = "total_return"
-data_file = "data_1m.csv"
+data_file = "data/data.csv"
 
 # Read data from csv
 btc_price = pd.read_csv(data_file)[["timestamp", "close"]]
@@ -17,7 +17,7 @@ btc_price = btc_price.set_index("date")["close"]
 
 # VectorBT part
 rsi = vbt.RSI.run(btc_price, window=100, short_name="rsi")
-sma = vbt.SMA.run(btc_price, window=50, short_name="sma")  # Adding SMA as an example
+sma = vbt.MA.run(btc_price, window=50, short_name="sma")  # Adding SMA as an example
 
 # Entry and exit points for the grid
 entry_points = np.linspace(30, 50, num=num)
