@@ -1,7 +1,11 @@
+import os
+
 import pandas as pd
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
 import warnings
+
+import settings
 
 # Filter out FutureWarnings from _plotly_utils.basevalidators
 warnings.filterwarnings('ignore', category=FutureWarning, module='_plotly_utils.basevalidators')
@@ -57,7 +61,7 @@ class Scraper:
             print("Current data will not be saved.")
         if self.df is not None:
             self.clean_data()
-            self.df.to_csv(filename, index=False)
+            self.df.to_csv(os.path.join(settings.DATA_DIR, filename), index=False)
         else:
             print("No data available to save!")
 
@@ -105,7 +109,7 @@ class Scraper:
 SETUP = {
     "currency_pair": "btcusdt",
     "range_size": 10,  # Number of Days in scraping period
-    "interval": 60,  # Length of one cline
+    "interval": 60,  # Length of one cline, sec
     "filename": "data.csv",  # Where to save the data | None to not save
     "show_timestamps": False,
     "show_plot": True
