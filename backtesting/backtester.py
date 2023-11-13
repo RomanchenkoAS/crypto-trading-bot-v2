@@ -51,6 +51,7 @@ class Backtester:
         return self.pf
 
     def run_grid_backtest(self):
+        """ Backtest a grid of strategies """
         self.validate_data()
         rsi = vbt.RSI.run(self.data, window=self.config['window'], short_name="rsi")
 
