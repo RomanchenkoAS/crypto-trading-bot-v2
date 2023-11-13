@@ -9,9 +9,9 @@ from scraping.scraper import Scraper
 
 class Backtester:
     def __init__(self, config: Dict[str, Any], data: pd.DataFrame = None):
-        self.config = config
-        self.data = data
-        self.pf = None  # Portfolio will be stored here after running backtests
+        self.config: Dict = config
+        self.data: pd.DataFrame = data
+        self.pf: vbt.Portfolio | None = None
         self.validate_config()
 
     def validate_config(self):
@@ -19,19 +19,19 @@ class Backtester:
         if not all(key in self.config for key in required_keys):
             raise ValueError(f"Config dictionary is missing one of the required keys: {required_keys}")
 
-    def load_data_from_csv(self, file_path: str):
-        self.data = pd.read_csv(file_path)[["timestamp", "close"]]
-        self.data["date"] = pd.to_datetime(self.data["timestamp"], unit="s")
-        self.data = self.data.set_index("date")["close"]
-
-    def verify_data(self):
+    def validate_data(self):
         if self.data is None:
             raise ValueError(f"Backtester is missing data source.")
         if not isinstance(self.data, pd.DataFrame):
             raise TypeError(f"Backtester input data is invalid.")
 
+    def load_data_from_csv(self, file_path: str):
+        self.data = pd.read_csv(file_path)[["timestamp", "close"]]
+        self.data["date"] = pd.to_datetime(self.data["timestamp"], unit="s")
+        self.data = self.data.set_index("date")["close"]
+
     def run_single_backtest(self):
-        self.verify_data()
+        self.validate_data()
         rsi = vbt.RSI.run(self.data, window=self.config['window'], short_name="rsi")
 
         entry_point = self.config['entry_point']
@@ -51,7 +51,7 @@ class Backtester:
         return self.pf
 
     def run_grid_backtest(self):
-        self.verify_data()
+        self.validate_data()
         rsi = vbt.RSI.run(self.data, window=self.config['window'], short_name="rsi")
 
         entry_points = np.linspace(self.config['entry_point'][0], self.config['entry_point'][1], num=self.config['num'])
