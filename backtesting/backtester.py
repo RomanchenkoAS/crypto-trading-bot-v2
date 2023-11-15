@@ -11,7 +11,7 @@ from scraping.scraper import Scraper
 # TODO we will need to gridsearch window as well as entries/exits
 # TODO backtester single will allow to write some results to json or csv
 
-# TODO lets make basebacktester
+# TODO lets make basebacktester base class
 # It will hold init, validates, and load data (csv and scraping)
 
 class Backtester:
