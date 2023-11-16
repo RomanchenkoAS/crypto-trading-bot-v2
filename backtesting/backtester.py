@@ -14,6 +14,7 @@ from scraping.scraper import Scraper
 # TODO lets make basebacktester abstract base class
 # It will hold init, validates, and load data (csv and scraping)
 
+
 class Backtester:
     def __init__(self, config: Dict[str, Any], data: pd.DataFrame = None):
         self.config: Dict = config
