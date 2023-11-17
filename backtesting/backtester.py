@@ -13,6 +13,7 @@ from scraping.scraper import Scraper
 
 # TODO lets make basebacktester abstract base class (this is refactor)
 # It will hold init, validates, and load data (csv and scraping)
+# n
 
 
 class Backtester:
