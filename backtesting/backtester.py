@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from typing import Dict, Any
 
 import numpy as np
@@ -7,15 +8,7 @@ import vectorbt as vbt
 from scraping.scraper import Scraper
 
 
-# TODO Make basic backtester and subclasses that allow grid and single search
-# TODO we will need to gridsearch window as well as entries/exits
-# TODO backtester single will allow to write some results to json or csv
-
-# TODO lets make basebacktester abstract base class
-# It will hold init, validates, and load data (csv and scraping)
-
-
-class Backtester:
+class BaseBacktester(ABC):
     def __init__(self, config: Dict[str, Any], data: pd.DataFrame = None):
         self.config: Dict = config
         self.data: pd.DataFrame = data
@@ -26,6 +19,7 @@ class Backtester:
         required_keys = ['window', 'entry_point', 'exit_point', 'num', 'fee', 'stop_loss', 'take_profit', 'metric']
         if not all(key in self.config for key in required_keys):
             raise ValueError(f"Config dictionary is missing one of the required keys: {required_keys}")
+        # TODO add types and ranges check for input data
 
     def validate_data(self):
         if self.data is None:
@@ -38,7 +32,22 @@ class Backtester:
         self.data["date"] = pd.to_datetime(self.data["timestamp"], unit="s")
         self.data = self.data.set_index("date")["close"]
 
-    def run_single_backtest(self):
+    @abstractmethod
+    def run_backtest(self):
+        pass
+
+    @abstractmethod
+    def display_results(self):
+        pass
+
+
+class SingleStrategyBacktester(BaseBacktester):
+    def display_results(self):
+        if self.pf is not None:
+            print(self.pf.stats())
+            self.pf.plot().show()
+
+    def run_backtest(self):
         self.validate_data()
         rsi = vbt.RSI.run(self.data, window=self.config['window'], short_name="rsi")
 
@@ -55,10 +64,12 @@ class Backtester:
             fee=self.config['fee']
         )
 
-        self.display_single_strategy_results()
+        self.display_results()
         return self.pf
 
-    def run_grid_backtest(self):
+
+class GridBacktester(BaseBacktester):
+    def run_backtest(self):
         """ Backtest a grid of strategies """
         self.validate_data()
         rsi = vbt.RSI.run(self.data, window=self.config['window'], short_name="rsi")
@@ -77,15 +88,10 @@ class Backtester:
             fee=self.config['fee']
         )
 
-        self.display_grid_strategy_results()
+        self.display_results()
         return self.pf
 
-    def display_single_strategy_results(self):
-        if self.pf is not None:
-            print(self.pf.stats())
-            self.pf.plot().show()
-
-    def display_grid_strategy_results(self):
+    def display_results(self):
         if self.pf is not None:
             print(self.pf.stats(agg_func=None))
             # Output performance matrix
@@ -94,6 +100,13 @@ class Backtester:
                 index_levels="rsi_crossed_above", column_levels="rsi_crossed_below"
             )
             pf_perf_matrix.vbt.heatmap(xaxis_title="entry", yaxis_title="exit").show()
+
+
+# TODO we will need to gridsearch window as well as entries/exits
+# TODO backtester single will allow to write some results to json or csv
+
+# TODO lets make basebacktester abstract base class
+# It will hold init, validates, and load data (csv and scraping)
 
 
 # Assuming your Scraper class is already defined as per your existing script
@@ -112,8 +125,8 @@ backtester_config = {
     'stop_loss': 5,
     'take_profit': 10
 }
-backtester_single = Backtester(config=backtester_config, data=data)
-single_pf = backtester_single.run_single_backtest()
+backtester_single = SingleStrategyBacktester(config=backtester_config, data=data)
+single_pf = backtester_single.run_backtest()
 
 # For a grid backtest:
 backtester_config = {
@@ -125,5 +138,5 @@ backtester_config = {
     'stop_loss': 5,
     'take_profit': 10
 }
-backtester_grid = Backtester(config=backtester_config, data=data)
-grid_pf = backtester_grid.run_grid_backtest()
+backtester_grid = GridBacktester(config=backtester_config, data=data)
+grid_pf = backtester_grid.run_backtest()
