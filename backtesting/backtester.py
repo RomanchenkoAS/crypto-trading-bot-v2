@@ -101,12 +101,12 @@ class GridBacktester(BaseBacktester):
             )
             pf_perf_matrix.vbt.heatmap(xaxis_title="entry", yaxis_title="exit").show()
 
+# TODO test both backtesters with existing input
+
 
 # TODO we will need to gridsearch window as well as entries/exits
 # TODO backtester single will allow to write some results to json or csv
 
-# TODO lets make basebacktester abstract base class
-# It will hold init, validates, and load data (csv and scraping)
 
 
 # Assuming your Scraper class is already defined as per your existing script
