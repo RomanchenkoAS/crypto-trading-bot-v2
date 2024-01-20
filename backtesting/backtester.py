@@ -101,14 +101,12 @@ class GridBacktester(BaseBacktester):
             )
             pf_perf_matrix.vbt.heatmap(xaxis_title="entry", yaxis_title="exit").show()
 
+
 # TODO test both backtesters with existing input
 # TODO make a grid search for a good window/input-output
-# TODO think about stoplosses
 
 # TODO we will need to gridsearch window as well as entries/exits
 # TODO backtester single will allow to write some results to json or csv
-
-
 
 # Assuming your Scraper class is already defined as per your existing script
 scraper = Scraper(currency_pair="btcusdt")
