@@ -1,12 +1,11 @@
-import json
-import os
-import time
-from datetime import datetime
-
+from decouple import config
+from binance.client import Client
 import pandas as pd
 import pandas_ta as ta
-from binance.client import Client
-from decouple import config
+import time
+import json
+import os
+from datetime import datetime
 
 # testnet = True means all the trading is virtual
 client = Client(config("API_KEY"), config("SECRET_KEY"), testnet=True)
@@ -14,7 +13,6 @@ asset = "BTCUSDT"
 entry = 32.76
 exit = 62.83
 window = 100
-
 
 # Balance check
 # balance = client.get_asset_balance(asset="BTC")
