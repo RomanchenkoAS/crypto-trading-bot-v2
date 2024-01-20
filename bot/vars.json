@@ -2,6 +2,6 @@
   "asset": "BTCUSDT",
   "entry": 32.76,
   "exit": 62.83,
-  "window": 100,
-  "last_move": "SELL"
+  "window": 10,
+  "is_buying": "True"
 }

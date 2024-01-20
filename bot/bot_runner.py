@@ -12,9 +12,9 @@ from redis_utils import *
 client = Client(config("API_KEY"), config("SECRET_KEY"), testnet=True)
 variables = fetch_variables()
 asset = variables['asset']
-entry = variables['entry']
-exit = variables['exit']
-window = variables['window']
+entry = float(variables['entry'])
+exit = float(variables['exit'])
+window = int(variables['window'])
 
 
 def fetch_klines(asset):
@@ -34,20 +34,18 @@ def get_rsi(asset):
     klines = fetch_klines(asset)
     # Use tech analysis pandas module
     klines["rsi"] = ta.rsi(close=klines["price"], length=window)
-
-    print(klines["rsi"].iloc[-1])
-
+    # print(klines["rsi"].iloc[-1])
     return klines["rsi"].iloc[-1]
 
 
-def create_account():
-    account = {
-        "is_buying": True,
-        "assets": {},
-    }
-
-    with open("bot_account.json", "w") as f:
-        f.write(json.dumps(account))
+# def create_account():
+#     account = {
+#         "is_buying": True,
+#         "assets": {},
+#     }
+#
+#     with open("bot_account.json", "w") as f:
+#         f.write(json.dumps(account))
 
 
 def log(msg):
@@ -86,28 +84,28 @@ def trade_log(symbol, side, price, amount):
         trade_file.write(f"{symbol},{side},{amount},{price}\n")
 
 
-def do_trade(account, client, asset, side, quantity):
+def do_trade(client, asset, side, quantity):
     print("[LOG] Making a trade...")
 
+    order = None
     if side == "buy":
-        # market buy
         order = client.order_market_buy(
             symbol=asset,
             quantity=quantity,
         )
-
-        account["is_buying"] = False
+        set_variable('is_buying', False)
 
     if side == "sell":
-        # market sell
         order = client.order_market_sell(
             symbol=asset,
             quantity=quantity,
         )
+        set_variable('is_buying', True)
 
-        account["is_buying"] = True
+    order_id = order.get("orderId", None)
 
-    order_id = order["orderId"]
+    if order_id is None:
+        raise Exception(f"Failed to get a valid order, order_id is None. {client=} {asset=} {side=} {quantity=}")
 
     # Until the order is fulfilled refresh it every second
     while order["status"] != "FILLED":
@@ -129,20 +127,11 @@ def do_trade(account, client, asset, side, quantity):
     # Log trade
     trade_log(asset, side, price_paid, quantity)
 
-    with open("bot_account.json", "w") as f:
-        f.write(json.dumps(account))
-
-    print("[LOG] ... trade is over and logged")
+    # print("[LOG] ... trade is over and logged")
 
 
 def main():
-    # Balance check
-    balance = client.get_asset_balance(asset="BTC")
-    print(balance)
-    return
-
     rsi = get_rsi(asset)
-    old_rsi = rsi  # to check crossover event
 
     # Main working loop
     while True:
@@ -150,43 +139,41 @@ def main():
         seconds = current_time.tm_sec
 
         # If seconds are not 00 wait 1 sec and go to the next iteration
-        if seconds != 0:
-            time.sleep(1)
-            continue
+        # if seconds != 0:
+        #     time.sleep(1)
+        #     continue
 
         try:
-            if not os.path.exists("bot_account.json"):
-                create_account()
-
-            with open("bot_account.json") as f:
-                account = json.load(f)
+            # if not os.path.exists("bot_account.json"):
+            #     create_account()
+            #
+            # with open("bot_account.json") as f:
+            #     account = json.load(f)
+            is_buying = get_variable('is_buying')
 
             old_rsi = rsi
             rsi = get_rsi(asset)
 
-            if account["is_buying"]:
+            if is_buying:
                 # If crossover up-to-down ▼
-                if rsi < entry and old_rsi > entry:
+                if rsi < entry < old_rsi:
                     # trade buy
-                    do_trade(account, client, asset, "buy", 0.01)
+                    do_trade(client, asset, "buy", 0.01)
 
             else:
                 # If crossover bottom-up ▲
-                if rsi > exit and old_rsi < exit:
+                if rsi > exit > old_rsi:
                     # trade sell
-                    do_trade(account, client, asset, "sell", 0.01)
+                    do_trade(client, asset, "sell", 0.01)
 
             print(
-                "[INFO] current rsi =",
-                round(rsi, 3),
-                " |",
-                time.strftime("%y.%m.%d %H:%M:%S", current_time),
+                f"[INFO] current rsi = {round(rsi, 3)} | {time.strftime('%y.%m.%d %H:%M:%S', current_time)}"
             )
 
             time.sleep(2)
 
-        except Exception as _ex:
-            log("[ERR] " + str(_ex))
+        except Exception as e:
+            log("[ERR] " + str(e))
             time.sleep(30)
 
 

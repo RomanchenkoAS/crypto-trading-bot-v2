@@ -15,14 +15,23 @@ def initialize_variables() -> None:
             redis_client.set(key, value)
 
 
-def fetch_variables() -> Dict[str, str]:
+def fetch_variables() -> Dict[str, any]:
     with open('vars.json', 'r') as file:
         data = json.load(file)
     variables = {key: redis_client.get(key).decode('utf-8') for key in data.keys()}
     return variables
 
 
-def set_variable(key: str, value: str) -> None:
+def get_variable(key: str) -> str:
+    """
+    Get a specific variable from Redis.
+
+    :param key: The key of the variable to get.
+    """
+    return redis_client.get(key).decode('utf-8')
+
+
+def set_variable(key: str, value: any) -> None:
     """
     Set a specific variable in Redis.
 

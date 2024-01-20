@@ -15,6 +15,7 @@ python-binance = "^1.0.19"
 pandas = "^2.2.0"
 pandas-ta = "^0.3.14b0"
 redis = "^5.0.1"
+pyarrow = "^14.0.2"
 
 
 
