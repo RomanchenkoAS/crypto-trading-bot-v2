@@ -1,0 +1,7 @@
+{
+  "asset": "BTCUSDT",
+  "entry": 32.76,
+  "exit": 62.83,
+  "window": 10,
+  "is_buying": "True"
+}

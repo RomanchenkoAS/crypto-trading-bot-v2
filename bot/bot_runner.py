@@ -10,6 +10,7 @@ from redis_utils import *
 
 # testnet = True means all the trading is virtual
 client = Client(config("API_KEY"), config("SECRET_KEY"), testnet=True)
+initialize_variables()
 variables = fetch_variables()
 asset = variables['asset']
 entry = float(variables['entry'])
@@ -23,10 +24,8 @@ def fetch_klines(asset):
     )
 
     klines = [[x[0], float(x[4])] for x in klines]
-
     klines = pd.DataFrame(klines, columns=["time", "price"])
     klines["time"] = pd.to_datetime(klines["time"], unit="ms")
-
     return klines
 
 
