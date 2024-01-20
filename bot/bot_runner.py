@@ -1,4 +1,3 @@
-import json
 import os
 import time
 from datetime import datetime
@@ -6,19 +5,16 @@ from datetime import datetime
 import pandas as pd
 import pandas_ta as ta
 from binance.client import Client
-from decouple import config
+
+from redis_utils import *
 
 # testnet = True means all the trading is virtual
 client = Client(config("API_KEY"), config("SECRET_KEY"), testnet=True)
-asset = "BTCUSDT"
-entry = 32.76
-exit = 62.83
-window = 100
-
-
-# Balance check
-# balance = client.get_asset_balance(asset="BTC")
-# print(balance)
+variables = fetch_variables()
+asset = variables['asset']
+entry = variables['entry']
+exit = variables['exit']
+window = variables['window']
 
 
 def fetch_klines(asset):
@@ -139,7 +135,12 @@ def do_trade(account, client, asset, side, quantity):
     print("[LOG] ... trade is over and logged")
 
 
-if __name__ == "__main__":
+def main():
+    # Balance check
+    balance = client.get_asset_balance(asset="BTC")
+    print(balance)
+    return
+
     rsi = get_rsi(asset)
     old_rsi = rsi  # to check crossover event
 
@@ -187,3 +188,7 @@ if __name__ == "__main__":
         except Exception as _ex:
             log("[ERR] " + str(_ex))
             time.sleep(30)
+
+
+if __name__ == "__main__":
+    main()
