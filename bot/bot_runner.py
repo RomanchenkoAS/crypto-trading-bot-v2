@@ -1,5 +1,6 @@
 import os
 import time
+import traceback
 from datetime import datetime
 
 import pandas as pd
@@ -47,8 +48,11 @@ def get_rsi(asset):
 #         f.write(json.dumps(account))
 
 
-def log(msg):
-    message = f"{msg}"
+def log(message, include_traceback=False):
+    # Include traceback if the flag is set and the message is an error
+    if include_traceback and "ERR" in message:
+        message += "\n" + traceback.format_exc()
+
     print("[LOG] ", message)
 
     # Create a directory for logs if not exist
@@ -57,10 +61,10 @@ def log(msg):
 
     now = datetime.now()
     today = now.strftime("%Y-%m-%d")
-    time = now.strftime("%H-%M-%S")
+    time_str = now.strftime("%H-%M-%S")
 
     with open(f"logs/{today}.txt", "a+") as log_file:
-        log_file.write(f"{time} : {msg}\n")
+        log_file.write(f"{time_str} : {message}\n")
 
 
 def trade_log(symbol, side, price, amount):
@@ -172,7 +176,7 @@ def main():
             time.sleep(2)
 
         except Exception as e:
-            log("[ERR] " + str(e))
+            log("[ERR] " + str(e), include_traceback=True)
             time.sleep(30)
 
 
