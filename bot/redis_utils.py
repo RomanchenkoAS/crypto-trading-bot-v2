@@ -38,7 +38,7 @@ def set_variable(key: str, value: any) -> None:
     :param key: The key of the variable to set.
     :param value: The value to set for the variable.
     """
-    redis_client.set(key, value)
+    redis_client.set(key, str(value))
 
 
 if __name__ == '__main__':
