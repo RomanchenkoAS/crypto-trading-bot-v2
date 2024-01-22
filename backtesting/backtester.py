@@ -24,8 +24,8 @@ class BaseBacktester(ABC):
     def validate_data(self):
         if self.data is None:
             raise ValueError(f"Backtester is missing data source.")
-        if not isinstance(self.data, pd.DataFrame):
-            raise TypeError(f"Backtester input data is invalid.")
+        if not isinstance(self.data, pd.DataFrame) and not isinstance(self.data, pd.Series):
+            raise TypeError(f"Backtester input data is invalid. Must be DataFrame, not {type(self.data)}.")
 
     def load_data_from_csv(self, file_path: str):
         self.data = pd.read_csv(file_path)[["timestamp", "close"]]
@@ -59,9 +59,9 @@ class SingleStrategyBacktester(BaseBacktester):
 
         self.pf = vbt.Portfolio.from_signals(
             self.data, entries, exits,
-            stop_loss=self.config['stop_loss'],
-            take_profit=self.config['take_profit'],
-            fee=self.config['fee']
+            sl_stop=self.config['stop_loss'],
+            tp_stop=self.config['take_profit'],
+            fees=self.config['fee']
         )
 
         self.display_results()
@@ -83,9 +83,9 @@ class GridBacktester(BaseBacktester):
 
         self.pf = vbt.Portfolio.from_signals(
             self.data, entries, exits,
-            stop_loss=self.config['stop_loss'],
-            take_profit=self.config['take_profit'],
-            fee=self.config['fee']
+            sl_stop=self.config['stop_loss'],
+            tp_stop=self.config['take_profit'],
+            fees=self.config['fee']
         )
 
         self.display_results()
@@ -108,33 +108,39 @@ class GridBacktester(BaseBacktester):
 # TODO we will need to gridsearch window as well as entries/exits
 # TODO backtester single will allow to write some results to json or csv
 
-scraper = Scraper(currency_pair="btcusdt")
-scraper.set_time_range(range_size=30)
-scraper.scrape(interval=60)
-data = scraper.get_dataframe()
+def main():
+    scraper = Scraper(currency_pair="btcusdt")
+    scraper.set_time_range(range_size=30)
+    scraper.scrape(interval=60)
+    data = scraper.get_dataframe()
 
-# For a single strategy backtest:
-backtester_config = {
-    'window': 100,
-    'entry_point': 32.76,  # Single entry point for single backtest
-    'exit_point': 62.83,  # Single exit point for single backtest
-    'num': 30,  # Number of cells in heatmap
-    'fee': 0.001,
-    'stop_loss': 5,
-    'take_profit': 10
-}
-backtester_single = SingleStrategyBacktester(config=backtester_config, data=data)
-single_pf = backtester_single.run_backtest()
+    # For a single strategy backtest:
+    backtester_config = {
+        'window': 100,
+        'entry_point': 32.76,  # Single entry point for single backtest
+        'exit_point': 62.83,  # Single exit point for single backtest
+        'num': 30,  # Number of cells in heatmap
+        'fee': 0.001,
+        'stop_loss': 5,
+        'take_profit': 10,
+        'metric':  'total_return',
+    }
+    backtester_single = SingleStrategyBacktester(config=backtester_config, data=data)
+    single_pf = backtester_single.run_backtest()
 
-# For a grid backtest:
-backtester_config = {
-    'window': 100,
-    'entry_point': (30, 50),
-    'exit_point': (58, 72),
-    'num': 30,
-    'fee': 0.001,
-    'stop_loss': 5,
-    'take_profit': 10
-}
-backtester_grid = GridBacktester(config=backtester_config, data=data)
-grid_pf = backtester_grid.run_backtest()
+    # For a grid backtest:
+    backtester_config = {
+        'window': 100,
+        'entry_point': (30, 50),
+        'exit_point': (58, 72),
+        'num': 30,
+        'fee': 0.001,
+        'stop_loss': 5,
+        'take_profit': 10,
+        'metric': 'total_return',
+    }
+    backtester_grid = GridBacktester(config=backtester_config, data=data)
+    grid_pf = backtester_grid.run_backtest()
+
+if __name__ == '__main__':
+    main()
