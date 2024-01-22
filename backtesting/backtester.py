@@ -108,7 +108,6 @@ class GridBacktester(BaseBacktester):
 # TODO we will need to gridsearch window as well as entries/exits
 # TODO backtester single will allow to write some results to json or csv
 
-# Assuming your Scraper class is already defined as per your existing script
 scraper = Scraper(currency_pair="btcusdt")
 scraper.set_time_range(range_size=30)
 scraper.scrape(interval=60)
