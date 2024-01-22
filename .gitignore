@@ -1,6 +1,12 @@
+# Environment
 .venv
 .idea
+
+# Secret variables
 /**/.env
-data/*
-bot/logs/*.txt
 /**/*.pem
+
+
+/**/data/*.csv
+bot/logs/*.txt
+bot/trades/*
