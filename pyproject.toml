@@ -10,12 +10,12 @@ python = "3.10.12"
 vectorbt = "^0.25.5"
 jupyter = "^1.0.0"
 grequests = "^0.7.0"
-python-decouple = "^3.8"
 python-binance = "^1.0.19"
 pandas = "^2.2.0"
 pandas-ta = "^0.3.14b0"
 redis = "^5.0.1"
 pyarrow = "^14.0.2"
+python-dotenv = "^1.0.1"
 
 
 

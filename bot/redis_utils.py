@@ -1,11 +1,12 @@
 import json
+import os
 from typing import Dict
 
 import redis
-from decouple import config
-
+from dotenv import load_dotenv
+load_dotenv()
 # Initialize Redis client
-redis_client = redis.Redis(host=config('REDIS_HOST'), port=config('REDIS_PORT'), db=0)
+redis_client = redis.Redis(host=os.getenv('REDIS_HOST'), port=os.getenv('REDIS_PORT'), db=0)
 
 
 def initialize_variables() -> None:

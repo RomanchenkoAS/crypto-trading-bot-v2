@@ -6,11 +6,13 @@ from datetime import datetime
 import pandas as pd
 import pandas_ta as ta
 from binance.client import Client
+from dotenv import load_dotenv
 
 from redis_utils import *
 
+load_dotenv()
 # testnet = True means all the trading is virtual
-client = Client(config("API_KEY"), config("SECRET_KEY"), testnet=True)
+client = Client(os.getenv("API_KEY"), os.getenv("SECRET_KEY"), testnet=True)
 initialize_variables()
 variables = fetch_variables()
 asset = variables['asset']
