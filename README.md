@@ -1,3 +1,6 @@
+# Description
+This is an upgraded version of my older crypto trading bot: https://github.com/RomanchenkoAS/binance-trading-bot. Full desctiption may be found there.
+
 #### Requirements:
 - managed by poetry: run ``` poetry install ```
 
