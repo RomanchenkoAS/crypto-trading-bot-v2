@@ -19,7 +19,6 @@ class BaseBacktester(ABC):
         required_keys = ['window', 'entry_point', 'exit_point', 'num', 'fee', 'stop_loss', 'take_profit', 'metric']
         if not all(key in self.config for key in required_keys):
             raise ValueError(f"Config dictionary is missing one of the required keys: {required_keys}")
-        # TODO add types and ranges check for input data
 
     def validate_data(self):
         if self.data is None:
@@ -102,12 +101,6 @@ class GridBacktester(BaseBacktester):
             pf_perf_matrix.vbt.heatmap(xaxis_title="entry", yaxis_title="exit").show()
 
 
-# TODO test both backtesters with existing input
-# TODO make a grid search for a good window/input-output
-
-# TODO we will need to gridsearch window as well as entries/exits
-# TODO backtester single will allow to write some results to json or csv
-
 def main():
     scraper = Scraper(currency_pair="btcusdt")
     scraper.set_time_range(range_size=30)
@@ -123,7 +116,7 @@ def main():
         'fee': 0.001,
         'stop_loss': 5,
         'take_profit': 10,
-        'metric':  'total_return',
+        'metric': 'total_return',
     }
     backtester_single = SingleStrategyBacktester(config=backtester_config, data=data)
     single_pf = backtester_single.run_backtest()
@@ -141,6 +134,7 @@ def main():
     }
     backtester_grid = GridBacktester(config=backtester_config, data=data)
     grid_pf = backtester_grid.run_backtest()
+
 
 if __name__ == '__main__':
     main()
